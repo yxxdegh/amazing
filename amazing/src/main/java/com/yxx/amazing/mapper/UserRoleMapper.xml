@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yxx.amazing.dao.UserRoleMapper">
+  
+	<select id="getRolesByUserId" resultType="com.yxx.amazing.common.bo.RoleBo">
+		SELECT r.Id,r.RoleName,ifnull(ur.User_Id,0) marker ,ur.User_Id userId 
+		FROM tbl_role r
+		LEFT JOIN(select * from tbl_user_role where User_Id=#{id}) ur on ur.Role_Id = r.Id
+		order by r.id ASC
+	</select>
+	
+	
+	<select id="listAllUserRoleByMap" resultType="com.yxx.amazing.common.bo.UserRoleBo" >
+		SELECT u.Id,u.UserName, GROUP_CONCAT(r.RoleName  order by r.RoleName desc) roleNames,GROUP_CONCAT(r.Id)roleIds
+		FROM tbl_user u 
+		LEFT JOIN tbl_user_role ur ON ur.User_Id = u.Id
+		LEFT JOIN tbl_role r ON r.Id = ur.Role_Id
+		<where>
+			<if test="userName != null and userName !=''">
+				and UserName like CONCAT('%',#{userName},'%')
+			</if>
+		</where>
+			GROUP BY u.Id   
+	</select> 
+	
+	 <!-- 根据用户ID删除-->
+  <delete id="deleteByUserId">
+  	delete from tbl_user_role where User_Id =  #{userId}
+  </delete>
+  
+    <insert id="saveUserRole" parameterType="com.yxx.amazing.domain.UserRole" >
+    	insert into tbl_user_role ( User_Id,Role_Id) values (#{userId},#{roleId})
+  	</insert>
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+<!-- 引用外部配置文件 
+	resource引用类路径下的资源  
+	url引用网络路径下的资源
+-->
+<!-- <properties resource="db.properties"></properties> -->
+
+
+<!-- settings包含很多重要的设置项 -->
+<settings>
+	<!-- ssm集成后控制台打印sql -->
+	<setting name="logImpl" value="STDOUT_LOGGING" />
+	<!--开启驼峰命名映射  -->
+	<setting name="mapUnderscoreToCamelCase" value="true"/>
+	<!-- mybatis默认把null值映射为JDBC Other类型。Oracle不认识该类型。因此要显式的指出 -->
+	<!-- <setting name="jdbcTypeForNull" value="NULL"/>  -->
+    <!-- 开启懒加载 -->
+    <setting name="lazyLoadingEnabled" value="true"/>
+    <setting name="aggressiveLazyLoading" value="false"/>
+    <!-- 开启二级缓存 -->
+    <setting name="cacheEnabled" value="true"/>
+</settings>
+	
+	 <!-- 分页插件 -->
+	<plugins>
+		<plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <!--helperDialect：分页插件会自动检测当前的数据库链接，自动选择合适的分页方式。 你可以配置helperDialect属性来指定分页插件使用哪种方言。-->
+			<property name="helperDialect" value="mysql"/>
+            <!--params：为了支持startPage(Object params)方法，增加了该参数来配置参数映射，用于从对象中根据属性名取值， 可以配置 pageNum,pageSize,count,pageSizeZero,reasonable，不配置映射的用默认值， 默认值为pageNum=pageNum;pageSize=pageSize;count=countSql;reasonable=reasonable;pageSizeZero=pageSizeZero。-->
+			<property name="params" value="pageNum=pageNum;pageSize=pageSize"/>
+            <!--pageSizeZero：默认值为 false，当该参数设置为 true 时，如果 pageSize=0 或者 RowBounds.limit = 0 就会查询出全部的结果（相当于没有执行分页查询，但是返回结果仍然是 Page 类型）。-->
+			<property name="pageSizeZero" value="true"/>
+            <!--reasonable：分页合理化参数，默认值为false。当该参数设置为 true 时，pageNum<=0 时会查询第一页， pageNum>pages（超过总数时），会查询最后一页。默认false 时，直接根据参数进行查询。-->
+            <property name="reasonable" value="true"/>
+		</plugin>
+	</plugins>
+</configuration>

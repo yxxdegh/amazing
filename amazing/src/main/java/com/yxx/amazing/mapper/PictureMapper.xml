@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yxx.amazing.dao.PictureMapper">
+	
+	 <select id="listAllPictureByMap" resultType="com.yxx.amazing.domain.Picture" >
+		select * from tbl_picture
+		<where>
+	    	<if test="id != null and id !=''">
+            	 Id=#{id}
+        	</if>
+	        <if test="pictureName != null and pictureName !=''">
+	            and PictureName like CONCAT('%',#{pictureName},'%')
+	        </if>
+	      
+		</where>
+	</select> 
+	
+	<insert id="savePicture" parameterType="com.yxx.amazing.domain.Picture" useGeneratedKeys="true" keyProperty="Id">
+		insert into tbl_picture (Picture_Name,Src,Description) values (#{pictureName},#{src},#{description})
+	</insert>
+</mapper>

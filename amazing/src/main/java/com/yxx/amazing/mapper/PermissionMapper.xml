@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yxx.amazing.dao.PermissionMapper">
+	
+	<select id="listTopMenuByUserId" resultType="com.yxx.amazing.domain.Permission">
+		SELECT DISTINCT p.Name,p.Icon,p.Id
+		FROM tbl_permission p , tbl_role_permission rp, tbl_user_role ur 
+		WHERE User_Id =#{userId} AND p.Id = rp.Permission_Id AND rp.Role_Id = ur.Role_Id AND p.Pid=0
+	</select>
+	
+	<select id="listLeftMenu" resultType="com.yxx.amazing.common.bo.LeftMenuBo">
+		SELECT DISTINCT p.Id, p.Name title,p.Url href,p.Icon icon 
+		FROM tbl_permission p  ,tbl_role_permission rp 
+		WHERE pid=#{topMenuId} 
+		AND rp.Permission_Id=p.Id
+		AND rp.Role_id IN  
+		<foreach collection="roleIds" item="roleId"
+            open="(" close=")" separator=",">
+            #{roleId}
+        </foreach> 
+	</select>
+	
+	<select id="listChild" resultType="com.yxx.amazing.common.bo.LeftMenuBo">
+		  SELECT p.Id ,p.Name title,p.Url href,p.Icon icon FROM tbl_permission p WHERE p.pid=#{id}
+	</select>
+	
+	<select id="listPermissionByUserId" resultType="com.yxx.amazing.domain.Permission">
+	  	SELECT DISTINCT p.*
+		FROM tbl_permission p , tbl_role_permission rp, tbl_user_role ur 
+		WHERE User_Id =#{userId} AND p.Id = rp.Permission_Id AND rp.Role_Id = ur.Role_Id
+	</select>
+	
+	<select id="getPermissionsByUserId" resultType="com.yxx.amazing.domain.Permission">
+		SELECT DISTINCT p.*
+		FROM tbl_permission p , tbl_role_permission rp, tbl_user_role ur 
+		WHERE User_Id =#{userId} AND p.Id = rp.Permission_Id AND rp.Role_Id = ur.Role_Id
+	</select>
+	
+
+	
+
+	
+	
+	
+</mapper>

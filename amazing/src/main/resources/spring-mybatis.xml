@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+	
+	<!-- 阿里 druid 数据库连接池 --> 
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"  init-method="init" destroy-method="close">  
+        <!-- 数据库基本信息配置  --> 
+        <property name="url" value="${jdbc.jdbcUrl}" />   
+        <property name="username" value="${jdbc.username}" />  
+        <property name="password" value="${jdbc.password}" />             
+        <!-- 配置初始化大小、最小、最大 -->  
+        <property name="initialSize" value="10" />  
+        <property name="minIdle" value="30" />  
+        <property name="maxActive" value="300" />  
+   		<!-- 配置获取连接等待超时的时间   -->
+        <property name="maxWait" value="180000" />  
+        <!--  配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒   -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />  
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒  --> 
+        <property name="minEvictableIdleTimeMillis" value="30000" />  
+        <property name="validationQuery" value="SELECT 'x' FROM dual" />  
+        <property name="testWhileIdle" value="true" />  
+        <property name="testOnBorrow" value="true" />  
+        <property name="testOnReturn" value="false" />  
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小  --> 
+        <property name="poolPreparedStatements" value="true" />  
+        <property name="maxPoolPreparedStatementPerConnectionSize"  value="20" />  
+    </bean>  
+   
+    <!-- 配置阿里云连接池状态监控 -->  
+    <bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">  
+    	<!-- 监控sql执行大于1s的sql -->
+        <property name="slowSqlMillis" value="1000" />  
+        <property name="logSlowSql" value="true" />  
+        <property name="mergeSql" value="true" />  
+    </bean>  
+
+
+	<!--创建出SqlSessionFactory对象  -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- configLocation指定全局配置文件的位置 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<!--mapperLocations: 指定mapper文件的位置-->
+		<property name="mapperLocations" value="classpath:com/yxx/amazing/mapper/*.xml"></property>
+	</bean>
+	<!-- 扫描所有的mapper接口的实现,让这些mapper能够自动注入;base-package:指定mapper接口的包名-->
+	<!-- <mybatis-spring:scan base-package="com.yxx.baseproject.dao"/> -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.yxx.amazing.dao"></property>
+	</bean>
+<!-- AOP配置--> 
+<!-- 配置Spring的声明式事务 -->
+	<!-- 1.配置事务管理器 -->
+	<bean id="TransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!--  2.配置事务属性 需要事务管理器-->
+	<tx:advice id="txAdvice" transaction-manager="TransactionManager">
+		<tx:attributes>
+		<!-- 配置哪些方法使用什么样的事务  配置事务的传播特性 -->
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="add*" propagation="REQUIRED"/>
+			<tx:method name="insert*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="*"  propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+	<!-- 3.配置事务切入点，再把事务属性和事务切入点关联起来 -->
+	<aop:config>
+		<aop:pointcut expression="execution(* com.yxx.amazing.service.*.*(..))" id="txPointcut" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />
+	</aop:config> 
+
+
+</beans>
